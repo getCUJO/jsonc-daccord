@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+SortIncludes: false
+SortUsingDeclarations: false
+RemoveBracesLLVM: false
+BraceWrapping:
+  AfterFunction: true
+BreakBeforeBraces: Custom
