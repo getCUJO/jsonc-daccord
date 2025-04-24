@@ -1,0 +1,7 @@
+Checks: "clang-diagnostic-*,clang-analyzer-*,-misc-unused-includes,-clang-diagnostic-reserved-identifier,-clang-diagnostic-unused-parameter"
+WarningsAsErrors: ''
+HeaderFileExtensions:
+  - ''
+  - h
+ImplementationFileExtensions:
+  - c
