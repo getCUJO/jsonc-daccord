@@ -8,8 +8,7 @@
 void _jdac_store_append(storage_node **head, storage_node *ref)
 {
     storage_node *new_node = malloc(sizeof(storage_node));
-    if (new_node == NULL)
-    {
+    if (new_node == NULL) {
         fprintf(stderr, "Error: malloc failed\n");
         return;
     }
@@ -20,7 +19,7 @@ void _jdac_store_append(storage_node **head, storage_node *ref)
 
 void _jdac_store_free(storage_node **head)
 {
-    while(*head) {
+    while (*head) {
         // if ((*head)->is_root==1 && (*head)->json_instance_ptr!=NULL)
         //     json_object_put((*head)->json_instance_ptr);
         storage_node *el = *head;
@@ -33,14 +32,13 @@ void _jdac_store_free(storage_node **head)
 int _jdac_store_traverse_json(storage_node **head, json_object *jschema, char *pathbuffer)
 {
     char pathbuf[256];
-    pathbuf[0]=0;
+    pathbuf[0] = 0;
     storage_node node = {0};
 
-    if (pathbuffer==NULL) {
+    if (pathbuffer == NULL) {
         strcpy(pathbuf, "#/");
         node.is_root = 1;
-    }
-    else {
+    } else {
         strcpy(pathbuf, pathbuffer);
         node.is_root = 0;
     }
@@ -63,57 +61,61 @@ int _jdac_store_traverse_json(storage_node **head, json_object *jschema, char *p
     }
 
     // if (jid || janchor || jdynamicanchor || node.is_root==1) {
-        strcpy(node.JSONPtrURI, pathbuf);
-        node.json_schema_ptr = jschema;
-        _jdac_store_append(head, &node);
+    strcpy(node.JSONPtrURI, pathbuf);
+    node.json_schema_ptr = jschema;
+    _jdac_store_append(head, &node);
     // }
 
-    json_object_object_foreach(jschema, jkey, jval) {
+    json_object_object_foreach(jschema, jkey, jval)
+    {
         if (json_object_is_type(jval, json_type_object)) {
 
-            if (strcmp(jkey, "const")==0)
+            if (strcmp(jkey, "const") == 0)
                 continue;
 
-            if (pathbuffer==NULL)
+            if (pathbuffer == NULL)
                 sprintf(pathbuf, "#/%s", jkey);
             else
                 sprintf(pathbuf, "%s/%s", pathbuffer, jkey);
-            //printf("%s\n", pathbuf);
+            // printf("%s\n", pathbuf);
             _jdac_store_traverse_json(head, jval, pathbuf);
         }
     }
-    return JDAC_ERR_VALID; 
+    return JDAC_ERR_VALID;
 }
 
 void _jdac_store_print(storage_node *head)
 {
-    storage_node* list = head;
+    storage_node *list = head;
     // printf("%-*s %-*s %-*s %-*s\n", 32, "JSONPtr", 16, "anchor", 16, "dynamicAnchor", 32, "id");
-    while(list) {
-        // printf("%-*s %-*s %-*s %-*s\n", 32, list->JSONPtrURI, 16, list->anchor, 16, list->dynamicAnchor, 32, list->id);
+    while (list) {
+        // printf("%-*s %-*s %-*s %-*s\n", 32, list->JSONPtrURI, 16, list->anchor, 16,
+        // list->dynamicAnchor, 32, list->id);
         list = list->next;
     }
 }
 
-storage_node* _jdac_store_get_root_node(storage_node *head)
+storage_node *_jdac_store_get_root_node(storage_node *head)
 {
     // spool to start of list
-    storage_node* list = head;
+    storage_node *list = head;
     printf("%-*s %-*s %-*s %-*s\n", 32, "JSONPtr", 16, "anchor", 16, "dynamicAnchor", 32, "id");
-    while(list) {
-        printf("%-*s %-*s %-*s %-*s\n", 32, list->JSONPtrURI, 16, list->anchor, 16, list->dynamicAnchor, 32, list->id);
-        if (list->next==NULL) return list;
+    while (list) {
+        printf("%-*s %-*s %-*s %-*s\n", 32, list->JSONPtrURI, 16, list->anchor, 16,
+               list->dynamicAnchor, 32, list->id);
+        if (list->next == NULL)
+            return list;
         list = list->next;
     }
     return NULL;
 }
 
-json_object* _jdac_store_resolve(storage_node *list, const char *uri)
+json_object *_jdac_store_resolve(storage_node *list, const char *uri)
 {
-    while(list) {
-        if (strcmp(list->id, uri)==0)
+    while (list) {
+        if (strcmp(list->id, uri) == 0)
             return list->json_instance_ptr;
-        if (strcmp(list->JSONPtrURI, uri)==0)
+        if (strcmp(list->JSONPtrURI, uri) == 0)
             return list->json_instance_ptr;
         list = list->next;
     }

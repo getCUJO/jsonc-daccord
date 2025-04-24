@@ -23,17 +23,17 @@ int _jdac_check_pattern(json_object *jobj, json_object *jschema, json_object *jo
 
     if (istr) {
         int ret = _jdac_match_string_with_regex(pattern, istr);
-        if (ret==JDAC_REGEX_COMPILE_FAILED) {
+        if (ret == JDAC_REGEX_COMPILE_FAILED) {
             printf("jdac, failed to compile regex: %s\n", istr);
-            json_object *jpattern_node = _jdac_output_create_and_append_node(joutput_node, "pattern");
+            json_object *jpattern_node =
+                _jdac_output_create_and_append_node(joutput_node, "pattern");
             _jdac_output_apply_result(jpattern_node, JDAC_ERR_SCHEMA_ERROR);
             return JDAC_ERR_SCHEMA_ERROR;
-        }
-        else if (ret==JDAC_REGEX_MATCH) {
+        } else if (ret == JDAC_REGEX_MATCH) {
             return JDAC_ERR_VALID;
-        }
-        else if (ret==JDAC_REGEX_MISMATCH) {
-            json_object *jpattern_node = _jdac_output_create_and_append_node(joutput_node, "pattern");
+        } else if (ret == JDAC_REGEX_MISMATCH) {
+            json_object *jpattern_node =
+                _jdac_output_create_and_append_node(joutput_node, "pattern");
             _jdac_output_apply_result(jpattern_node, JDAC_ERR_INVALID);
             return JDAC_ERR_INVALID;
         }

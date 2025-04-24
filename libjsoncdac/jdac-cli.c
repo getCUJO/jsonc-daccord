@@ -4,7 +4,7 @@
 #include "../include/jsoncdaccord.h"
 #include "version_config.h"
 
-char *json_file=NULL, *schema_file=NULL;
+char *json_file = NULL, *schema_file = NULL;
 
 void usage()
 {
@@ -20,8 +20,10 @@ void usage()
 
 void freeall()
 {
-    if (json_file) free(json_file);
-    if (schema_file) free(schema_file);
+    if (json_file)
+        free(json_file);
+    if (schema_file)
+        free(schema_file);
 }
 
 int main(int argc, char *argv[])
@@ -31,6 +33,7 @@ int main(int argc, char *argv[])
 
     while (1) {
         int option_index = 0;
+        // clang-format off
         static struct option long_options[] = {
             {"json",      required_argument, 0, 'j'},
             {"schema",    required_argument, 0, 's'},
@@ -41,44 +44,43 @@ int main(int argc, char *argv[])
             {"help",      no_argument,       0, 'h'},
             {0,           0,                 0,  0 }
         };
-
-        c = getopt_long(argc, argv, "j:s:l:v",
-                long_options, &option_index);
+        // clang-format on
+        c = getopt_long(argc, argv, "j:s:l:v", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
-            case 'j':
-                json_file = strdup(optarg);
-                break;
-            case 's':
-                schema_file = strdup(optarg);
-                break;
+        case 'j':
+            json_file = strdup(optarg);
+            break;
+        case 's':
+            schema_file = strdup(optarg);
+            break;
 #ifdef JDAC_REF
-            case 'l':
-                jdac_ref_set_localpath(optarg);
-                break;
+        case 'l':
+            jdac_ref_set_localpath(optarg);
+            break;
 #endif
-            case 'v':
-                printf("jdac-cli (%s version %s)\n\n", PROJECT_NAME, PROJECT_VER);
-                printf("configuration:\n");
+        case 'v':
+            printf("jdac-cli (%s version %s)\n\n", PROJECT_NAME, PROJECT_VER);
+            printf("configuration:\n");
 #ifdef JDAC_ERROR_OUTPUT
-                printf("  JDAC_ERROR_OUTPUT=ON\n");
+            printf("  JDAC_ERROR_OUTPUT=ON\n");
 #else
-                printf("  JDAC_ERROR_OUTPUT=OFF\n");
+            printf("  JDAC_ERROR_OUTPUT=OFF\n");
 #endif
-                printf("supported keywords:\n");
-                printf(" - base:     %s\n", SUPPORTED_KEYWORDS_BASE);
-                printf(" - selected: %s\n\n", SUPPORTED_KEYWORDS_OPTIONAL);
-                freeall();
-                return 0;
-                break;
-            case 'h':
-                usage();
-                freeall();
-                return JDAC_ERR_VALID;
-            default:
-                printf("?? getopt returned character code 0%o ??\n", c);
+            printf("supported keywords:\n");
+            printf(" - base:     %s\n", SUPPORTED_KEYWORDS_BASE);
+            printf(" - selected: %s\n\n", SUPPORTED_KEYWORDS_OPTIONAL);
+            freeall();
+            return 0;
+            break;
+        case 'h':
+            usage();
+            freeall();
+            return JDAC_ERR_VALID;
+        default:
+            printf("?? getopt returned character code 0%o ??\n", c);
         }
     }
 
@@ -96,10 +98,9 @@ int main(int argc, char *argv[])
         return JDAC_ERR_WRONG_ARGS;
     }
 
-
     printf("validating %s with %s\n", json_file, schema_file);
     int err = jdac_validate_file(json_file, schema_file);
-    if (err==JDAC_ERR_VALID) {
+    if (err == JDAC_ERR_VALID) {
         printf("validation ok\n");
     } else {
         printf("validate failed. err %d: %s\n", err, jdac_errorstr(err));

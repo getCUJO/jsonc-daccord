@@ -7,7 +7,7 @@
 
 #ifdef JDAC_ERROR_OUTPUT
 
-json_object* _jdac_output_create_node(const char *name)
+json_object *_jdac_output_create_node(const char *name)
 {
     json_object *joutput = json_object_new_object();
     json_object_object_add(joutput, "name", json_object_new_string(name));
@@ -23,7 +23,7 @@ void _jdac_output_append_node(json_object *joutput, json_object *jnode)
     }
 }
 
-json_object* _jdac_output_create_and_append_node(json_object *joutput, const char *name)
+json_object *_jdac_output_create_and_append_node(json_object *joutput, const char *name)
 {
     json_object *jarray;
     if (json_object_object_get_ex(joutput, "nodes", &jarray)) {
@@ -34,24 +34,24 @@ json_object* _jdac_output_create_and_append_node(json_object *joutput, const cha
     return NULL;
 }
 
-json_object* _jdac_output_create_and_append_node_concatnames(json_object *joutput, char *name1, char *name2)
+json_object *_jdac_output_create_and_append_node_concatnames(json_object *joutput, char *name1,
+                                                             char *name2)
 {
     char newname[256];
     snprintf(newname, sizeof(newname), "%s/%s", name1, name2);
     return _jdac_output_create_and_append_node(joutput, newname);
 }
 
-
 void _jdac_output_apply_result(json_object *joutput, enum jdac_errors err)
 {
-    int res = err==JDAC_ERR_VALID ? 1:0;
+    int res = err == JDAC_ERR_VALID ? 1 : 0;
     json_object_object_add(joutput, "valid", json_object_new_boolean(res));
 }
 
-void __jdac_output_print_traverse_error_nodes(json_object *jnode, const char *parentpathstr) 
+void __jdac_output_print_traverse_error_nodes(json_object *jnode, const char *parentpathstr)
 {
     char path[256];
-    if (jnode==NULL) {
+    if (jnode == NULL) {
         return;
     }
 
@@ -66,10 +66,10 @@ void __jdac_output_print_traverse_error_nodes(json_object *jnode, const char *pa
     json_object *jarray;
     if (json_object_object_get_ex(jnode, "nodes", &jarray)) {
         int arraylen = json_object_array_length(jarray);
-        if (arraylen==0) {
+        if (arraylen == 0) {
             printf("ERROR: %s\n", parentpathstr);
         }
-        for (int i=0; i<arraylen; i++) {
+        for (int i = 0; i < arraylen; i++) {
             json_object *jnode = json_object_array_get_idx(jarray, i);
             json_object *jname;
             if (json_object_object_get_ex(jnode, "name", &jname)) {
@@ -86,17 +86,17 @@ void _jdac_output_print_errors(json_object *joutput)
         return;
     }
 
-    json_object *rootnode = joutput;;
+    json_object *rootnode = joutput;
     json_object *jobj;
     if (json_object_object_get_ex(rootnode, "valid", &jobj)) {
         int valid = json_object_get_boolean(jobj);
         if (valid) {
-            //printf("Validation OK\n");
+            // printf("Validation OK\n");
         } else {
             json_object *jarray;
             if (json_object_object_get_ex(rootnode, "nodes", &jarray)) {
                 int arraylen = json_object_array_length(jarray);
-                for (int i=0; i<arraylen; i++) {
+                for (int i = 0; i < arraylen; i++) {
                     json_object *jnode = json_object_array_get_idx(jarray, i);
                     __jdac_output_print_traverse_error_nodes(jnode, "#");
                 }
@@ -106,32 +106,23 @@ void _jdac_output_print_errors(json_object *joutput)
 }
 
 #else
-json_object* _jdac_output_create_node(const char *name)
+json_object *_jdac_output_create_node(const char *name) { return NULL; }
+
+void _jdac_output_append_node(json_object *joutput, json_object *jnode) {}
+
+json_object *_jdac_output_create_and_append_node(json_object *joutput, const char *name)
 {
     return NULL;
 }
 
-void _jdac_output_append_node(json_object *joutput, json_object *jnode)
-{
-}
-
-json_object* _jdac_output_create_and_append_node(json_object *joutput, const char *name)
+json_object *_jdac_output_create_and_append_node_concatnames(json_object *joutput, char *name1,
+                                                             char *name2)
 {
     return NULL;
 }
 
-json_object* _jdac_output_create_and_append_node_concatnames(json_object *joutput, char *name1, char *name2)
-{
-    return NULL;
-}
+void _jdac_output_apply_result(json_object *joutput, enum jdac_errors err) {}
 
-
-void _jdac_output_apply_result(json_object *joutput, enum jdac_errors err)
-{
-}
-
-void _jdac_output_print_errors(json_object *joutput)
-{    
-}
+void _jdac_output_print_errors(json_object *joutput) {}
 
 #endif

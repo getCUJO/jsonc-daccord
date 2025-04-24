@@ -13,25 +13,27 @@
 #include "../include/jsoncdaccord.h"
 #include "../include/jdac_internal.h"
 
-#define UNIT_TESTING 1  //overloads malloc,calloc,free,etc to mocka versions
+#define UNIT_TESTING 1 // overloads malloc,calloc,free,etc to mocka versions
 
 // these tests are intended to be run along side the JSON Test Suite.
 
-struct test_env{
+struct test_env {
     struct json_object *json;
     struct json_object *schema;
 };
 
-static int test_env_init(void **state){
+static int test_env_init(void **state)
+{
     printf("%s\n", __func__);
-    struct test_env *env = (struct test_env *) malloc(sizeof(struct test_env));
+    struct test_env *env = (struct test_env *)malloc(sizeof(struct test_env));
     *state = env;
     memset(env, 0, sizeof(struct test_env));
 
     return 0;
 }
 
-// these are needed when a test fails, we don't want address-sanitiser to thing there is a memory error.
+// these are needed when a test fails, we don't want address-sanitiser to thing there is a memory
+// error.
 void freejson(void **state)
 {
     struct test_env *e = (struct test_env *)*state;
@@ -50,9 +52,10 @@ void freeschema(void **state)
     }
 }
 
-static int test_env_free(void **state){
+static int test_env_free(void **state)
+{
     printf("%s\n", __func__);
-    struct test_env *env =  (struct test_env *) *state;
+    struct test_env *env = (struct test_env *)*state;
 
     freejson(state);
     freeschema(state);
