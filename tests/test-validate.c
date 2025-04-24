@@ -12,25 +12,27 @@
 #include <json-c/json.h>
 #include "../include/jsoncdaccord.h"
 #include "../include/jdac_internal.h"
-//#include "common.h"
+// #include "common.h"
 
-#define UNIT_TESTING 1  //overloads malloc,calloc,free,etc to mocka versions
+#define UNIT_TESTING 1 // overloads malloc,calloc,free,etc to mocka versions
 
-struct test_env{
+struct test_env {
     struct json_object *json;
     struct json_object *schema;
 };
 
-static int test_env_init(void **state){
+static int test_env_init(void **state)
+{
     printf("%s\n", __func__);
-    struct test_env *env = (struct test_env *) malloc(sizeof(struct test_env));
+    struct test_env *env = (struct test_env *)malloc(sizeof(struct test_env));
     *state = env;
     memset(env, 0, sizeof(struct test_env));
 
     return 0;
 }
 
-// these are needed when a test fails, we don't want address-sanitiser to thing there is a memory error.
+// these are needed when a test fails, we don't want address-sanitiser to thing there is a memory
+// error.
 void freejson(void **state)
 {
     struct test_env *e = (struct test_env *)*state;
@@ -49,9 +51,10 @@ void freeschema(void **state)
     }
 }
 
-static int test_env_free(void **state){
+static int test_env_free(void **state)
+{
     printf("%s\n", __func__);
-    struct test_env *env =  (struct test_env *) *state;
+    struct test_env *env = (struct test_env *)*state;
 
     freejson(state);
     freeschema(state);
@@ -69,13 +72,13 @@ enum willreturn {
 struct json_object *__real_json_object_from_file(const char *filename);
 struct json_object *__wrap_json_object_from_file(const char *filename)
 {
-    //printf("__wrap_json_object_from_file()\n");
+    // printf("__wrap_json_object_from_file()\n");
     int i = mock_type(int);
-    if (i==WILL_RETURN_NULL)
+    if (i == WILL_RETURN_NULL)
         return NULL;
-    if (i==WILL_RETURN_NON_NULL)
+    if (i == WILL_RETURN_NON_NULL)
         return json_object_new_object();
-    if (i==WILL_RETURN_USE_REAL_FUNCTION)
+    if (i == WILL_RETURN_USE_REAL_FUNCTION)
         return __real_json_object_from_file(filename);
 
     return NULL;
@@ -107,111 +110,111 @@ static void test_check_type(void **state)
     assert_non_null(e->schema);
 
     jobj = json_object_object_get(e->json, "test-object");
-    jschema  = json_object_object_get(e->schema, "test-nonstring");
+    jschema = json_object_object_get(e->schema, "test-nonstring");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_SCHEMA_ERROR);
 
     jobj = json_object_object_get(e->json, "test-object");
-    jschema  = json_object_object_get(e->schema, "test-nonstring2");
+    jschema = json_object_object_get(e->schema, "test-nonstring2");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_SCHEMA_ERROR);
 
     jobj = json_object_object_get(e->json, "test-object");
-    jschema  = json_object_object_get(e->schema, "test-object");
+    jschema = json_object_object_get(e->schema, "test-object");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-array");
-    jschema  = json_object_object_get(e->schema, "test-object");
+    jschema = json_object_object_get(e->schema, "test-object");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
     jobj = json_object_object_get(e->json, "test-object");
-    jschema  = json_object_object_get(e->schema, "test-array");
+    jschema = json_object_object_get(e->schema, "test-array");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-object");
-    jschema  = json_object_object_get(e->schema, "test-object");
+    jschema = json_object_object_get(e->schema, "test-object");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-array");
-    jschema  = json_object_object_get(e->schema, "test-array");
+    jschema = json_object_object_get(e->schema, "test-array");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-string");
-    jschema  = json_object_object_get(e->schema, "test-string");
+    jschema = json_object_object_get(e->schema, "test-string");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
     jobj = json_object_object_get(e->json, "test-string");
-    jschema  = json_object_object_get(e->schema, "test-integer");
+    jschema = json_object_object_get(e->schema, "test-integer");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
     jobj = json_object_object_get(e->json, "test-integer");
-    jschema  = json_object_object_get(e->schema, "test-string");
+    jschema = json_object_object_get(e->schema, "test-string");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-integer");
-    jschema  = json_object_object_get(e->schema, "test-integer");
+    jschema = json_object_object_get(e->schema, "test-integer");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-double");
-    jschema  = json_object_object_get(e->schema, "test-integer");
+    jschema = json_object_object_get(e->schema, "test-integer");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-double");
-    jschema  = json_object_object_get(e->schema, "test-integer");
+    jschema = json_object_object_get(e->schema, "test-integer");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-double");
-    jschema  = json_object_object_get(e->schema, "test-double");
+    jschema = json_object_object_get(e->schema, "test-double");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-integer");
-    jschema  = json_object_object_get(e->schema, "test-double");
+    jschema = json_object_object_get(e->schema, "test-double");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-double");
-    jschema  = json_object_object_get(e->schema, "test-string");
+    jschema = json_object_object_get(e->schema, "test-string");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
     jobj = json_object_object_get(e->json, "test-boolean");
-    jschema  = json_object_object_get(e->schema, "test-boolean");
+    jschema = json_object_object_get(e->schema, "test-boolean");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_VALID);
 
     jobj = json_object_object_get(e->json, "test-string");
-    jschema  = json_object_object_get(e->schema, "test-boolean");
+    jschema = json_object_object_get(e->schema, "test-boolean");
     assert_non_null(jobj);
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
-    jschema  = json_object_object_get(e->schema, "test-nonsense");
+    jschema = json_object_object_get(e->schema, "test-nonsense");
     assert_non_null(jschema);
     assert_int_equal(_jdac_check_type(jobj, jschema, joutput), JDAC_ERR_SCHEMA_ERROR);
 
@@ -232,36 +235,7 @@ static void test_check_required(void **state)
     assert_non_null(e->schema);
 
     // an empty schema shall always result in true
-    jschema  = json_object_object_get(e->schema, "test-emptyschema");
-    assert_non_null(jschema);
- 
-    jobj = json_object_object_get(e->json, "test-emptyjson");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-    jobj = json_object_object_get(e->json, "test-keywords-abc");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-    jobj = json_object_object_get(e->json, "test-keywords-a");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-    jobj = json_object_object_get(e->json, "test-wrongtype");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-
-    jschema  = json_object_object_get(e->schema, "test-norequired");
-    assert_non_null(jschema);
-
-    jobj = json_object_object_get(e->json, "test-emptyjson");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-    jobj = json_object_object_get(e->json, "test-keywords-abc");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-    jobj = json_object_object_get(e->json, "test-keywords-a");
-    assert_non_null(jobj);
-    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
-
-    jschema  = json_object_object_get(e->schema, "test-required-empty");
+    jschema = json_object_object_get(e->schema, "test-emptyschema");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "test-emptyjson");
@@ -277,7 +251,36 @@ static void test_check_required(void **state)
     assert_non_null(jobj);
     assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
 
-    jschema  = json_object_object_get(e->schema, "test-require-a");
+    jschema = json_object_object_get(e->schema, "test-norequired");
+    assert_non_null(jschema);
+
+    jobj = json_object_object_get(e->json, "test-emptyjson");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+    jobj = json_object_object_get(e->json, "test-keywords-abc");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+    jobj = json_object_object_get(e->json, "test-keywords-a");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+
+    jschema = json_object_object_get(e->schema, "test-required-empty");
+    assert_non_null(jschema);
+
+    jobj = json_object_object_get(e->json, "test-emptyjson");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+    jobj = json_object_object_get(e->json, "test-keywords-abc");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+    jobj = json_object_object_get(e->json, "test-keywords-a");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+    jobj = json_object_object_get(e->json, "test-wrongtype");
+    assert_non_null(jobj);
+    assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_VALID);
+
+    jschema = json_object_object_get(e->schema, "test-require-a");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "test-keywords-abc");
@@ -299,7 +302,7 @@ static void test_check_required(void **state)
     assert_non_null(jobj);
     assert_int_equal(_jdac_check_required(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
-    jschema  = json_object_object_get(e->schema, "test-require-abc");
+    jschema = json_object_object_get(e->schema, "test-require-abc");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "test-keywords-abc");
@@ -336,7 +339,7 @@ static void test_check_properties(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-    jschema  = json_object_object_get(e->schema, "noproperties");
+    jschema = json_object_object_get(e->schema, "noproperties");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "emptyobject");
@@ -352,7 +355,7 @@ static void test_check_properties(void **state)
     assert_non_null(jobj);
     assert_int_equal(_jdac_check_properties(jobj, jschema, joutput), JDAC_ERR_VALID);
 
-    jschema  = json_object_object_get(e->schema, "emptyproperties");
+    jschema = json_object_object_get(e->schema, "emptyproperties");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "emptyobject");
@@ -368,7 +371,7 @@ static void test_check_properties(void **state)
     assert_non_null(jobj);
     assert_int_equal(_jdac_check_properties(jobj, jschema, joutput), JDAC_ERR_VALID);
 
-    jschema  = json_object_object_get(e->schema, "typetests");
+    jschema = json_object_object_get(e->schema, "typetests");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "emptyobject");
@@ -384,7 +387,7 @@ static void test_check_properties(void **state)
     assert_non_null(jobj);
     assert_int_equal(_jdac_check_properties(jobj, jschema, joutput), JDAC_ERR_INVALID);
 
-    jschema  = json_object_object_get(e->schema, "string-properties");
+    jschema = json_object_object_get(e->schema, "string-properties");
     assert_non_null(jschema);
     jobj = json_object_object_get(e->json, "testjsonstring-all");
     assert_non_null(jobj);
@@ -419,7 +422,7 @@ static void test_check_items(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-    jschema  = json_object_object_get(e->schema, "test1");
+    jschema = json_object_object_get(e->schema, "test1");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "test1");
@@ -434,7 +437,7 @@ static void test_check_items(void **state)
     assert_non_null(jobj);
     assert_int_equal(jdac_validate(jobj, jschema), JDAC_ERR_INVALID);
 
-    jschema  = json_object_object_get(e->schema, "nested");
+    jschema = json_object_object_get(e->schema, "nested");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "nestedarray");
@@ -459,8 +462,7 @@ static void test_check_enums(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-
-    jschema  = json_object_object_get(e->schema, "enum-string");
+    jschema = json_object_object_get(e->schema, "enum-string");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "teststring1");
@@ -479,8 +481,7 @@ static void test_check_enums(void **state)
     assert_non_null(jobj);
     assert_int_equal(jdac_validate(jobj, jschema), JDAC_ERR_INVALID);
 
-
-    jschema  = json_object_object_get(e->schema, "enum-integer");
+    jschema = json_object_object_get(e->schema, "enum-integer");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "testinteger1");
@@ -499,8 +500,7 @@ static void test_check_enums(void **state)
     assert_non_null(jobj);
     assert_int_equal(jdac_validate(jobj, jschema), JDAC_ERR_INVALID);
 
-
-    jschema  = json_object_object_get(e->schema, "enum-schemaerror");
+    jschema = json_object_object_get(e->schema, "enum-schemaerror");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "testinteger1");
@@ -523,7 +523,6 @@ static void test_check_enums(void **state)
     freeschema(state);
 }
 
-
 static void test_check_uniqueItems(void **state)
 {
     struct test_env *e = (struct test_env *)*state;
@@ -534,7 +533,7 @@ static void test_check_uniqueItems(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-    jschema  = json_object_object_get(e->schema, "unique");
+    jschema = json_object_object_get(e->schema, "unique");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "array-empty");
@@ -569,7 +568,7 @@ static void test_check_uniqueItems(void **state)
     assert_non_null(jobj);
     assert_int_equal(jdac_validate(jobj, jschema), JDAC_ERR_INVALID);
 
-    jschema  = json_object_object_get(e->schema, "notunique");
+    jschema = json_object_object_get(e->schema, "notunique");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "array-empty");
@@ -604,7 +603,7 @@ static void test_check_uniqueItems(void **state)
     assert_non_null(jobj);
     assert_int_equal(jdac_validate(jobj, jschema), JDAC_ERR_VALID);
 
-    jschema  = json_object_object_get(e->schema, "schemaerror");
+    jschema = json_object_object_get(e->schema, "schemaerror");
     assert_non_null(jschema);
 
     jobj = json_object_object_get(e->json, "array-notunique1");
@@ -630,7 +629,7 @@ static void test_check_maxmin_items(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-    jschema  = json_object_object_get(e->schema, "schema-2-3");
+    jschema = json_object_object_get(e->schema, "schema-2-3");
     assert_non_null(jschema);
     jobj = json_object_object_get(e->json, "array-1");
     assert_non_null(jobj);
@@ -662,7 +661,7 @@ static void test_validate_array(void **state)
     assert_non_null(e->json);
     assert_non_null(e->schema);
 
-    jschema  = json_object_object_get(e->schema, "schema-2-3");
+    jschema = json_object_object_get(e->schema, "schema-2-3");
     assert_non_null(jschema);
     jobj = json_object_object_get(e->json, "array-1");
     assert_non_null(jobj);
@@ -734,7 +733,6 @@ static void test_validate_number(void **state)
     assert_int_equal(jdac_validate(e->json, e->schema), JDAC_ERR_INVALID);
     freejson(state);
 
-
     // Schema: type double
     freeschema(state);
     e->schema = json_object_new_object();
@@ -759,7 +757,7 @@ static void test_validate_number(void **state)
     e->json = json_object_new_double(3.0);
     assert_int_equal(_jdac_validate_double(e->json, e->schema, joutput), JDAC_ERR_INVALID);
     freejson(state);
-    e->json = json_object_new_double(4-0);
+    e->json = json_object_new_double(4 - 0);
     assert_int_equal(_jdac_validate_double(e->json, e->schema, joutput), JDAC_ERR_VALID);
     freejson(state);
     e->json = json_object_new_double(5.0);
@@ -775,7 +773,7 @@ static void test_validate_number(void **state)
     e->json = json_object_new_double(3.0);
     assert_int_equal(jdac_validate(e->json, e->schema), JDAC_ERR_INVALID);
     freejson(state);
-    e->json = json_object_new_double(4-0);
+    e->json = json_object_new_double(4 - 0);
     assert_int_equal(jdac_validate(e->json, e->schema), JDAC_ERR_VALID);
     freejson(state);
     e->json = json_object_new_double(5.0);
@@ -914,10 +912,10 @@ static void test_the_vectors_variants(void **state)
     assert_int_equal(jdac_validate(jobj, e->schema), JDAC_ERR_INVALID);
     freejson(state);
     freeschema(state);
-
 }
 int main()
 {
+    // clang-format off
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_jdac_load),
         cmocka_unit_test(test_check_type),
@@ -934,5 +932,6 @@ int main()
         cmocka_unit_test(test_the_vectors_json),
         cmocka_unit_test(test_the_vectors_variants),
     };
+    // clang-format on
     return cmocka_run_group_tests(tests, test_env_init, test_env_free);
 }
