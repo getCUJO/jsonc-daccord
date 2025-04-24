@@ -140,6 +140,18 @@ You can try the library with the jdac-cli command.
 ```/tmp/domos/domosqos-sta_statistics_json
 jdac-cli -h
 ```
+
+## Running clang-tidy
+Build with the export compile commands flag then run clang-tidy
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+make
+cd ..
+run-clang-tidy -p ./build/
+```
+
 ## To do
 - prevent infinite recursion
 
