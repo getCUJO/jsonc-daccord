@@ -28,10 +28,32 @@ endfunction()
 
 file(COPY json schema DESTINATION ${CMAKE_BINARY_DIR}/tests)
 
-addtest(test-flows.c    SOURCES "" LIBS jsoncdaccord_static cmocka json-c  )
-addtest(test-validate.c SOURCES "" LIBS cmocka json-c jsoncdaccord_static WRAPFUNCTIONS json_object_from_file )
-# addtest(test-suite-side-tests.c SOURCES "" LIBS cmocka json-c jsoncdaccord_static )
-addtest(test-dependent.c SOURCES "" LIBS cmocka json-c jsoncdaccord_static )
+if (JDAC_SHARED_LIBS)
+  set(JDAC_LIB jsoncdaccord_shared)
+else ()
+  set(JDAC_LIB jsoncdaccord_static)
+endif ()
+
+# compile all c files except the cli
+file(GLOB JDACSOURCES ../libjsoncdac/*.c)
+list(FILTER JDACSOURCES EXCLUDE REGEX jdac-cli.c)
+
+# turn on all definitions
+foreach(src ${OPTIONAL_ON_DEFAULT} ${OPTIONAL_OFF_DEFAULT})
+  string(TOUPPER ${src} srcupper)
+  set(jdacopts_all ${jdacopts_all} -DJDAC_${srcupper})
+ endforeach()
+
+# build sources as static
+# When these sources were built as shared, the wrap functions would not work.
+# It is a good idea to build all code, with all options turned on, for testing.
+add_library(jdac_test STATIC ${JDACSOURCES})
+target_link_libraries(jdac_test PUBLIC curl m cmocka json-c)
+target_compile_definitions(jdac_test PRIVATE ${jdacopts_all})
+
+addtest(test-flows.c     SOURCES "" LIBS jdac_test )
+addtest(test-validate.c  SOURCES "" LIBS jdac_test WRAPFUNCTIONS json_object_from_file )
+addtest(test-dependent.c SOURCES "" LIBS jdac_test )
 
 # Test JSON Schema Test Suite
 if (JDAC_RUN_TEST_SUITE)
