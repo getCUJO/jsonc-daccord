@@ -3,24 +3,7 @@ include_directories(../include)
 set(jsoncdaccord_SOURCES validate.c output.c)
 set(PUBLIC_HEADER_FILES ../include/jsoncdaccord.h)
 
-# plugin options
-# The option name is the name of the c.file excluding the .c extension
 
-list(APPEND OPTIONAL_ON_DEFAULT
-  additionalproperties
-  propertynames
-  subschemalogic
-  dependent
-  contains
-  ref
-  store
-)
-
-list(APPEND OPTIONAL_OFF_DEFAULT
-  pattern
-  patternproperties
-  download
-)
 
 foreach(src ${OPTIONAL_ON_DEFAULT})
   string(TOUPPER ${src} srcupper)
