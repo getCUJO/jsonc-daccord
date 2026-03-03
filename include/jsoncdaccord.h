@@ -1,5 +1,5 @@
-#ifndef __JSONCDACCORD_H
-#define __JSONCDACCORD_H
+#ifndef JSONCDACCORD_H
+#define JSONCDACCORD_H
 
 #include <json-c/json.h>
 
